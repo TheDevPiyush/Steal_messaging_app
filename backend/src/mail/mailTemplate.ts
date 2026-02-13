@@ -14,9 +14,9 @@ export const otpEmailTemplate = (code: string) => `
           <!-- Logo / Title -->
           <tr>
             <td align="center" style="padding-bottom:20px;">
-              <h2 style="margin:0; color:#2c3e50;">CloudVault</h2>
+              <h2 style="margin:0; color:#2c3e50;">Steal</h2>
               <p style="margin:5px 0 0; color:#7f8c8d; font-size:14px;">
-                Secure Cloud Storage
+                Your Private Talking Space 
               </p>
             </td>
           </tr>
@@ -65,7 +65,7 @@ export const otpEmailTemplate = (code: string) => `
           <tr>
             <td align="center" style="padding-top:25px;">
               <p style="font-size:12px; color:#b0b7c3; margin:0;">
-                © ${new Date().getFullYear()} CloudVault. All rights reserved.
+                © ${new Date().getFullYear()} Steal - Messaging App. <a href="https://thedevpiyush.com">TheDevPiyush.com</a>
               </p>
             </td>
           </tr>

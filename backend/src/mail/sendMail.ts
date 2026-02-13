@@ -9,13 +9,13 @@ const transport = createTransport({
     }
 })
 
-export const sendVerificationOTP = async (verifyCodePayload: string, recipient: string) => {
+export const sendVerificationOTP = async (verifyCodePayload: string, recipient: string, subject: string) => {
 
     try {
         const sendMail = await transport.sendMail({
             from: "thedevpiyush@gmail.com",
             to: recipient,
-            subject: "Testing Nodemailer",
+            subject: subject,
             html: otpEmailTemplate(verifyCodePayload)
         })
 

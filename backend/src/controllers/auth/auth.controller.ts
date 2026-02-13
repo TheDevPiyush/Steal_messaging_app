@@ -4,59 +4,100 @@ import { generateSecureOTP } from "../../utils/generateOTP";
 import { db } from "../../db";
 import { users } from "../../db/schema";
 import { eq } from "drizzle-orm";
+import { sendVerificationOTP } from "../../mail/sendMail";
 
 export const sendVerificatonCode = async (req: Request, res: Response, next: NextFunction) => {
-    const { email } = req.body;
+    try {
+        const { email } = req.body || {};
 
-    if (!email) {
-        next(throwError("Valid email is required", 400));
-    }
+        if (!email) {
+            throw (throwError("Valid email is required", 400));
+        }
 
-    const verificationCode = generateSecureOTP();
-    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 min window
+        const verificationCode = generateSecureOTP();
+        const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // OTP validity for 5 min only...
 
-    const [user] =
-        await db
-            .select()
-            .from(users)
-            .where(eq(users.email, email));
-
-    if (!user) {
-
-        const [newUser] =
-            await db
-                .insert(users)
-                .values({
-                    email: email,
-                    loginOTP: verificationCode,
-                    loginOTPExpiresAt: expiresAt
-                })
-                .returning()
-
-        return res.json({
-            success: true,
-            message: "OTP Sent",
-            data: newUser,
-        })
-    }
-
-    const [updateUser] =
-        await db
-            .update(users)
-            .set({
+        const [user] = await db
+            .insert(users)
+            .values({
+                email: email,
                 loginOTP: verificationCode,
-                loginOTPExpiresAt: expiresAt
+                loginOTPExpiresAt: expiresAt,
             })
-            .returning()
+            .onConflictDoUpdate({
+                target: users.email,
+                set: {
+                    loginOTP: verificationCode,
+                    loginOTPExpiresAt: expiresAt,
+                },
+            })
+            .returning();
 
-    if (updateUser) {
-        return res.json({
-            success: true,
-            message: "OTP Sent",
-            data: updateUser,
-        })
+        if (user) {
+
+            await sendVerificationOTP(user.loginOTP as string, user.email, "Steal - Login Code")
+
+            return res.json({
+                success: true,
+                message: "OTP Sent",
+                data: { email: user.email },
+            })
+        }
     }
-
-    next(throwError());
+    catch (e: any) {
+        next(e)
+    }
 }
 
+export const verifyCode = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { email, code } = req.body || {};
+
+        if (!email || !code) {
+            throw (throwError("Email & OTP Code is required", 400));
+        }
+
+        const [user] = await db
+            .select()
+            .from(users)
+            .where(eq(users.email, email))
+
+        if (!user) {
+            throw (throwError("User not found for this email", 404));
+        }
+
+        if (!user?.loginOTP || !user?.loginOTPExpiresAt) {
+            throw (throwError("No Sent OTP was found. Please request a new one.", 404));
+        }
+
+        const sentCode = user?.loginOTP;
+        const isOTPExpired = user?.loginOTPExpiresAt < new Date()
+
+        if (isOTPExpired) {
+            throw (throwError("OTP Code is expired"));
+        }
+
+        if (sentCode !== code) {
+            throw (throwError("Invalid OTP Code"));
+        }
+
+        const removeUsedOTP = await db
+            .update(users)
+            .set({
+                loginOTP: null,
+                loginOTPExpiresAt: null
+            })
+            .where(eq(users.email, email))
+
+        const { email: userEmail } = user
+
+        res.json({
+            success: true,
+            message: "OTP Verified",
+            data: { userEmail }
+        });
+    }
+    catch (e: any) {
+        next(e)
+    }
+}

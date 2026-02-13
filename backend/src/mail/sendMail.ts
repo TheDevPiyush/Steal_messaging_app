@@ -20,7 +20,6 @@ export const sendVerificationOTP = async (verifyCodePayload: string, recipient: 
         })
 
         if (sendMail.accepted.includes(recipient)) {
-            console.info("Verification OTP Sent.")
             return true
         }
     } catch (e: any) {

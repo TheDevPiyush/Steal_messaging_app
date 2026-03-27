@@ -2,8 +2,8 @@ import express from 'express';
 import type { NextFunction, Request, Response } from 'express';
 import dotenv from 'dotenv'
 import { errorHandler } from './src/middlewares/errorMiddleware';
-import { authRouter } from './src/routes/auth/auth.route';
-import { userRouer } from './src/routes/user/user.route';
+import { authRouter } from './src/routes/auth.route';
+import { userRouer } from './src/routes/user.route';
 
 dotenv.config();
 

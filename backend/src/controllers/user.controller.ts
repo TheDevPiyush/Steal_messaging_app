@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from "express"
 
+// get current user's data
 export const getMe = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const user = (req as any).user;

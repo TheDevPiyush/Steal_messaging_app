@@ -1,15 +1,21 @@
-import { StyleSheet } from 'react-native';
-
-import EditScreenInfo from '@/components/EditScreenInfo';
+import { Pressable, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text, View } from '@/components/Themed';
+import { useAuthStore } from '@/stores/authStore';
 
-export default function TabOneScreen() {
+export default function TabChatsScreen() {
+
+  const { user, token, logout } = useAuthStore();
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Tab One</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="app/(tabs)/index.tsx" />
-    </View>
+      <Text style={styles.title}>{user?.email}</Text>
+      <Text style={styles.title}>{user?.username}</Text>
+      <Text style={styles.title}>{token}</Text>
+      <TouchableOpacity onPress={() => { logout() }}>
+        <Text>
+          LogOut
+        </Text>
+      </TouchableOpacity>
+    </View >
   );
 }
 

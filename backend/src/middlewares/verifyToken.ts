@@ -4,6 +4,7 @@ import { db } from "../db";
 import { users } from "../db/schema";
 import { eq } from "drizzle-orm";
 
+// verify the jwt token from user
 export const verifyToken = async (
     req: Request,
     res: Response,

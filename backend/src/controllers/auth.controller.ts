@@ -1,12 +1,13 @@
 import type { Request, Response, NextFunction } from "express";
-import { throwError } from "../../middlewares/errorMiddleware";
-import { generateSecureOTP } from "../../utils/generateOTP";
-import { db } from "../../db";
-import { users } from "../../db/schema";
+import { throwError } from "../middlewares/errorMiddleware";
+import { generateSecureOTP } from "../utils/generateOTP";
+import { db } from "../db";
+import { users } from "../db/schema";
 import { eq } from "drizzle-orm";
-import { sendVerificationOTP } from "../../mail/sendMail";
+import { sendVerificationOTP } from "../utils/mail/sendMail";
 import jwt from 'jsonwebtoken'
 
+// send OTP to users' email
 export const sendVerificatonCode = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { email } = req.body || {};
@@ -16,7 +17,7 @@ export const sendVerificatonCode = async (req: Request, res: Response, next: Nex
         }
 
         const verificationCode = generateSecureOTP();
-        const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // OTP validity for 5 min only...
+        const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // OTP valid for 5 min only...
 
         const [user] = await db
             .insert(users)
@@ -50,6 +51,7 @@ export const sendVerificatonCode = async (req: Request, res: Response, next: Nex
     }
 }
 
+// verify the sent OTP
 export const verifyCode = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { email, code } = req.body || {};

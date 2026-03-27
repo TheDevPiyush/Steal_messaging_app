@@ -22,7 +22,7 @@ export default function TabLayout() {
           backgroundColor: Colors[colorScheme ?? 'light'].background,
         },
         tabBarStyle: {
-          backgroundColor: Colors[colorScheme ?? 'light'].background
+          backgroundColor: Colors[colorScheme ?? 'light'].background,
         },
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: useClientOnlyValue(false, true),
@@ -32,7 +32,7 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Chats',
-          tabBarIcon: ({ color }) => <TabBarIcon name="envelope" color={color} />,
+          tabBarIcon: ({ color }) => <TabBarIcon name="comment" color={color} />,
         }}
       />
 

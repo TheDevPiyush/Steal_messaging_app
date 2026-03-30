@@ -7,6 +7,8 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { useColorScheme } from '@/components/useColorScheme';
 import { useAuthStore } from '@/stores/authStore';
+import { connectRealtime, disconnectRealtime } from '@/services/realtimeSocket';
+import { initPushNotifications } from '@/services/pushNotifications';
 
 export {
   ErrorBoundary,
@@ -51,6 +53,18 @@ function RootLayoutNav() {
   const router = useRouter();
   const segments = useSegments();
   const token = useAuthStore((s) => s.token);
+
+  useEffect(() => {
+    if (token) {
+      connectRealtime(token);
+      void initPushNotifications(token);
+    } else {
+      disconnectRealtime();
+    }
+    return () => {
+      disconnectRealtime();
+    };
+  }, [token]);
 
   useEffect(() => {
     const inAuth = segments[0] === "(auth)";

@@ -1,7 +1,8 @@
 import type { Request, Response, NextFunction } from "express";
-import { desc, eq, or } from "drizzle-orm";
+import { and, desc, eq, or } from "drizzle-orm";
 import { db } from "../db";
 import { chats, messages, users } from "../db/schema";
+import { throwError } from "../middlewares/errorMiddleware";
 
 export const getAllChats = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -56,6 +57,52 @@ export const getAllChats = async (req: Request, res: Response, next: NextFunctio
       success: true,
       data: { chats: result },
     });
+  } catch (e: any) {
+    next(e);
+  }
+};
+
+/** Find existing 1:1 chat or create between current user and peer. */
+export const openChat = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const me = (req as any).user;
+    if (!me?.id) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const { peerUserId } = req.body || {};
+    if (typeof peerUserId !== "string" || peerUserId === me.id) {
+      throw throwError("peerUserId is required", 400);
+    }
+
+    const [peer] = await db.select().from(users).where(eq(users.id, peerUserId)).limit(1);
+    if (!peer) {
+      throw throwError("User not found", 404);
+    }
+
+    const myId = me.id as string;
+
+    const [existing] = await db
+      .select()
+      .from(chats)
+      .where(
+        or(
+          and(eq(chats.userAId, myId), eq(chats.userBId, peerUserId)),
+          and(eq(chats.userAId, peerUserId), eq(chats.userBId, myId))
+        )
+      )
+      .limit(1);
+
+    if (existing) {
+      return res.status(200).json({ success: true, data: { chatId: existing.id } });
+    }
+
+    const [created] = await db
+      .insert(chats)
+      .values({ userAId: myId, userBId: peerUserId })
+      .returning();
+
+    return res.status(201).json({ success: true, data: { chatId: created.id } });
   } catch (e: any) {
     next(e);
   }

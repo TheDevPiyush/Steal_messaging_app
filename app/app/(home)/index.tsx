@@ -9,12 +9,16 @@ import { useEffect, useMemo, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useChatInboxStore } from '@/stores/chatInboxStore';
+import Colors from '@/constants/Colors';
+import { useColorScheme } from '@/components/useColorScheme';
 
 export default function TabChatsScreen() {
   const { user, token, logout } = useAuthStore();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const inbox = useChatInboxStore((s) => s.lastByChat);
+  const colorScheme = useColorScheme() ?? 'light';
+  const bg = Colors[colorScheme].background;
 
   const [chats, setChats] = useState<ChatSummary[]>([]);
   const [loading, setLoading] = useState(false);
@@ -53,12 +57,18 @@ export default function TabChatsScreen() {
   }, [token]);
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: bg }]}>
       <View style={styles.header}>
         <View style={{ flex: 1 }}>
           <Text style={styles.title}>Chats</Text>
           <Text style={styles.subtitle}>{user?.username ?? user?.email ?? "User"}</Text>
         </View>
+        <Pressable
+          style={styles.iconBtn}
+          onPress={() => router.push({ pathname: "/(home)/search" as any })}
+        >
+          <Text style={styles.iconBtnText}>Search</Text>
+        </Pressable>
         <Pressable style={styles.logoutBtn} onPress={() => logout()}>
           <Text style={styles.logoutBtnText}>Logout</Text>
         </Pressable>
@@ -67,6 +77,7 @@ export default function TabChatsScreen() {
       <FlatList
         data={chats}
         keyExtractor={(item) => item.id}
+        style={{ backgroundColor: bg }}
         contentContainerStyle={styles.listContent}
         initialNumToRender={10}
         maxToRenderPerBatch={10}
@@ -136,7 +147,6 @@ export default function TabChatsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "transparent",
   },
 
   header: {
@@ -158,6 +168,17 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 
+  iconBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 10,
+    backgroundColor: "rgba(0,0,0,0.06)",
+    marginRight: 8,
+  },
+  iconBtnText: {
+    fontWeight: "800",
+    fontSize: 14,
+  },
   logoutBtn: {
     paddingHorizontal: 14,
     paddingVertical: 10,

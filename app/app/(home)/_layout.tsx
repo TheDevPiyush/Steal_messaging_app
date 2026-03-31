@@ -15,17 +15,22 @@ function TabBarIcon(props: {
 export default function TabLayout() {
   const colorScheme = useColorScheme();
 
+  const bg = Colors[colorScheme ?? 'light'].background;
+
   return (
     <Tabs
       screenOptions={{
         headerStyle: {
-          backgroundColor: Colors[colorScheme ?? 'light'].background,
+          backgroundColor: bg,
         },
+        headerShadowVisible: false,
         tabBarStyle: {
-          backgroundColor: Colors[colorScheme ?? 'light'].background,
+          backgroundColor: bg,
+          borderTopColor: 'rgba(0,0,0,0.06)',
         },
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: useClientOnlyValue(false, true),
+        sceneStyle: { backgroundColor: bg },
       }}>
 
       <Tabs.Screen
@@ -49,6 +54,27 @@ export default function TabLayout() {
         options={{
           title: 'Account',
           tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
+        }}
+      />
+
+      <Tabs.Screen
+        name="search"
+        options={{
+          href: null,
+        }}
+      />
+
+      <Tabs.Screen
+        name="chat/[chatId]"
+        options={{
+          href: null,
+        }}
+      />
+
+      <Tabs.Screen
+        name="call/new"
+        options={{
+          href: null,
         }}
       />
     </Tabs>

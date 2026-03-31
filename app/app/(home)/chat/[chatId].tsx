@@ -8,6 +8,9 @@ import type { Message } from "@/types/message";
 import { getCachedJson, setCachedJson } from "@/utils/cache";
 import { formatTimeOfDay } from "@/utils/format";
 import { emitChatSend, getRealtimeSocket } from "@/services/realtimeSocket";
+import Colors from "@/constants/Colors";
+import { useColorScheme } from "@/components/useColorScheme";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type CachedChatMessages = {
   messages: Message[]; // newest -> oldest
@@ -36,6 +39,9 @@ export default function ChatScreen() {
   const { chatId, peerId } = useLocalSearchParams<{ chatId: string; peerId?: string }>();
   const router = useRouter();
   const { user, token } = useAuthStore();
+  const insets = useSafeAreaInsets();
+  const colorScheme = useColorScheme() ?? "light";
+  const bg = Colors[colorScheme].background;
 
   const myId = user?.id ?? "me";
   const chatKey = String(chatId ?? "unknown");
@@ -263,7 +269,7 @@ export default function ChatScreen() {
 
   if (loadingInitial) {
     return (
-      <View style={styles.loadingWrap}>
+      <View style={[styles.loadingWrap, { backgroundColor: bg, paddingTop: insets.top }]}>
         <ActivityIndicator />
         <Text style={{ marginTop: 12, opacity: 0.7 }}>Loading messages...</Text>
       </View>
@@ -271,7 +277,7 @@ export default function ChatScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: bg, paddingTop: insets.top }]}>
       <View style={styles.topBar}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Text style={styles.backBtnText}>Back</Text>
@@ -310,7 +316,7 @@ export default function ChatScreen() {
         ref={(r) => {
           chatListRef.current = r;
         }}
-        style={styles.list}
+        style={[styles.list, { backgroundColor: bg }]}
         contentContainerStyle={styles.listContent}
         data={messages}
         inverted

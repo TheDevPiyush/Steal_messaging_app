@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { useColorScheme } from '@/components/useColorScheme';
 import { useAuthStore } from '@/stores/authStore';
+import Colors from '@/constants/Colors';
 import { connectRealtime, disconnectRealtime } from '@/services/realtimeSocket';
 import { initPushNotifications } from '@/services/pushNotifications';
 
@@ -54,6 +55,26 @@ function RootLayoutNav() {
   const segments = useSegments();
   const token = useAuthStore((s) => s.token);
 
+  const palette = Colors[colorScheme ?? "light"];
+  const navTheme =
+    colorScheme === "dark"
+      ? {
+          ...DarkTheme,
+          colors: {
+            ...DarkTheme.colors,
+            background: palette.background,
+            card: palette.background,
+          },
+        }
+      : {
+          ...DefaultTheme,
+          colors: {
+            ...DefaultTheme.colors,
+            background: palette.background,
+            card: palette.background,
+          },
+        };
+
   useEffect(() => {
     if (token) {
       connectRealtime(token);
@@ -76,7 +97,7 @@ function RootLayoutNav() {
   }, [token, segments]);
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={navTheme}>
       <Stack initialRouteName="(auth)">
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(home)" options={{ headerShown: false }} />

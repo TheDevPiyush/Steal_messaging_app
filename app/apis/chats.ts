@@ -34,3 +34,20 @@ export async function getChats(token: string | null, myUserId: string | null): P
   }
 }
 
+export async function openChat(token: string, peerUserId: string): Promise<string> {
+  if (!API) throw new Error("Backend not configured");
+  const res = await fetch(`${API}/chats/open`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ peerUserId }),
+  });
+  const data = await res.json().catch(() => null);
+  if (!res.ok) throw new Error(data?.message || "Could not open chat");
+  const id = data?.data?.chatId as string | undefined;
+  if (!id) throw new Error("Invalid response");
+  return id;
+}
+

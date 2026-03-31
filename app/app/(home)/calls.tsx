@@ -2,6 +2,9 @@ import { ActivityIndicator, Alert, FlatList, RefreshControl, StyleSheet, Touchab
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "expo-router";
 import { Text, View } from "@/components/Themed";
+import Colors from "@/constants/Colors";
+import { useColorScheme } from "@/components/useColorScheme";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuthStore } from "@/stores/authStore";
 import { getCalls } from "@/apis/calls";
 import type { CallLog, PaginatedCalls } from "@/types/call";
@@ -34,6 +37,9 @@ function CallRow({ call }: { call: CallLog }) {
 export default function TabCallScreen() {
   const router = useRouter();
   const { token } = useAuthStore();
+  const insets = useSafeAreaInsets();
+  const colorScheme = useColorScheme() ?? "light";
+  const bg = Colors[colorScheme].background;
 
   const cacheKey = useMemo(() => `calls:list`, []);
 
@@ -101,7 +107,7 @@ export default function TabCallScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: bg, paddingTop: insets.top }]}>
       <View style={styles.header}>
         <Text style={styles.title}>Calls</Text>
         <View style={styles.headerRight}>
@@ -139,6 +145,7 @@ export default function TabCallScreen() {
         <FlatList
           data={calls}
           keyExtractor={(item) => item.id}
+          style={{ backgroundColor: bg }}
           contentContainerStyle={styles.listContent}
           initialNumToRender={PAGE_SIZE}
           maxToRenderPerBatch={PAGE_SIZE}
